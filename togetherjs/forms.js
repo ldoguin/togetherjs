@@ -472,9 +472,11 @@ define(["jquery", "util", "session", "elementFinder", "eventMaker", "templating"
     }
     var el = $(elementFinder.findElement(msg.element));
     var tracker;
+    var trackerName;
     if (msg.tracker) {
       tracker = getTracker(el, msg.tracker);
       assert(tracker);
+      trackerName = tracker.trackerName;
     }
     var focusedEl = el[0].ownerDocument.activeElement;
     var focusedElSelection;
@@ -499,7 +501,7 @@ define(["jquery", "util", "session", "elementFinder", "eventMaker", "templating"
                                          msg.replace.delta.text);
       // apply this change to the history
       var changed = history.commit(msg.replace);
-      maybeSendUpdate(msg.element, history, tracker.trackerName);
+      maybeSendUpdate(msg.element, history, trackerName);
       if (! changed) {
         return;
       }
