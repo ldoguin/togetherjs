@@ -30,7 +30,7 @@ define(["util", "jquery"], function (util, $) {
       el = el[0];
     }
     if (el.id) {
-      return "#" + el.id;
+      return "#" + el.id.replace(/(:|\.)/g,'\\$1');
     }
     if (el.tagName == "BODY") {
       return "body";
@@ -88,6 +88,20 @@ define(["util", "jquery"], function (util, $) {
     }
   });
 
+
+  elementFinder.recSearch = function recSearch(id, rest, container) {
+    rest = id.substr(id.lastIndexOf(":"));
+    id = id.substr(0, id.lastIndexOf(":"));
+    el = document.getElementById(id);
+    if (el) {
+      return el.id;
+    } else if (id.lastIndexOf(":") !== -1) {
+        recSearch(id,rest, container);
+    } else {
+        throw elementFinder.CannotFind("#" + id, "No element by that id", container);
+    }
+  }
+
   elementFinder.findElement = function findElement(loc, container) {
     // FIXME: should this all just be done with document.querySelector()?
     // But no!  We can't ignore togetherjs elements with querySelector.
@@ -123,12 +137,23 @@ define(["util", "jquery"], function (util, $) {
     } else if (loc.indexOf("#") === 0) {
       var id;
       loc = loc.substr(1);
+      if (loc.indexOf("\\:") !== -1) {
+        loc = loc.replace(/\\:/g,':');
+      }
       if (loc.indexOf(":") === -1) {
         id = loc;
         rest = "";
       } else {
-        id = loc.substr(0, loc.indexOf(":"));
-        rest = loc.substr(loc.indexOf(":"));
+        el = document.getElementById(loc);
+        if (el) {
+            id = loc;
+          rest = "";
+        } else {
+          id = elementFinder.recSearch(loc, rest, container);
+          if (id) {
+            rest = loc.substr(id.length);
+          }
+        }
       }
       el = document.getElementById(id);
       if (! el) {
