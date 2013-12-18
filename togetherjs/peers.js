@@ -458,9 +458,11 @@ define(["util", "session", "storage", "require"], function (util, session, stora
     if (! obj) {
       return;
     }
-    obj.peers.forEach(function (peer) {
-      Peer.deserialize(peer);
-    });
+    if (obj.peers) {
+      for (var i=0; i < obj.peers.length; i++){
+        Peer.deserialize(obj.peers[i]);
+      }
+    }
   }
 
   peers.getPeer = function getPeer(id, message) {
